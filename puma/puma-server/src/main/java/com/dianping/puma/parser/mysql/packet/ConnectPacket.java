@@ -98,26 +98,51 @@ public class ConnectPacket extends AbstractResponsePacket {
 			context.setClientParam(context.getClientParam() & ~MySQLCommunicationConstant.CLIENT_LONG_PASSWORD);
 		}
 
-		if ((MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
-				context.getServerSubMinorVersion(), 4, 1, 0) || ((context.getProtocolVersion() > 9) && (context
-				.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_RESERVED) != 0))) {
-			if ((MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
-					context.getServerSubMinorVersion(), 4, 1, 1) || ((context.getProtocolVersion() > 9) && (context
-					.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_PROTOCOL_41) != 0))) {
-				context.setClientParam(context.getClientParam() | MySQLCommunicationConstant.CLIENT_PROTOCOL_41);
-				context.setHas41NewNewProt(true);
-
-			} else {
-				context.setClientParam(context.getClientParam() | MySQLCommunicationConstant.CLIENT_RESERVED);
-				context.setHas41NewNewProt(false);
-			}
-
-			context.setUse41Extensions(true);
-		}
-
+        //4.1.1及以上版本，直接使用新的协议
+        if(MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
+                context.getServerSubMinorVersion(), 4, 1, 1))
+        {
+            context.setUse41Extensions(true);
+            setClientParamFor41(context);
+        }
+        else if (MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
+                context.getServerSubMinorVersion(), 4, 1, 0))
+        {
+            context.setUse41Extensions(true);
+            //4.1.0版本，是否使用新的协议看服务器的CLIENT_PROTOCOL_41标记
+            if(context.getProtocolVersion() > 9 && (context
+                    .getServerCapabilities() & MySQLCommunicationConstant.CLIENT_PROTOCOL_41) != 0)
+            {
+                setClientParamFor41(context);
+            } else {
+                setClientParamPre41(context);
+            }
+        }
+        //4.1.0以前版本，是否使用新的协议看服务器的CLIENT_RESERVED和CLIENT_PROTOCOL_41标记
+        else if(context.getProtocolVersion() > 9 && (context
+                    .getServerCapabilities() & MySQLCommunicationConstant.CLIENT_RESERVED) != 0)
+        {
+            context.setUse41Extensions(true);
+            if((context
+                    .getServerCapabilities() & MySQLCommunicationConstant.CLIENT_PROTOCOL_41) != 0)
+            {
+                setClientParamFor41(context);
+            } else {
+                setClientParamPre41(context);
+            }
+        }
 	}
 
-	/**
+    private void setClientParamFor41(PumaContext context) {
+        context.setClientParam(context.getClientParam() | MySQLCommunicationConstant.CLIENT_PROTOCOL_41);
+        context.setHas41NewNewProt(true);
+    }
+    private void setClientParamPre41(PumaContext context) {
+        context.setClientParam(context.getClientParam() | MySQLCommunicationConstant.CLIENT_RESERVED);
+        context.setHas41NewNewProt(false);
+    }
+
+    /**
      * 
      */
 	private void parseVersion(PumaContext context) {
