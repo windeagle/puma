@@ -23,16 +23,15 @@ import com.dianping.puma.core.event.ChangedEvent;
 public class TestApi {
     public static void main(String[] args) {
         ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-        configBuilder.ddl(true);
+        configBuilder.ddl(false);
         configBuilder.dml(true);
-        configBuilder.host("127.0.0.1");
-        configBuilder.port(7862);
-        configBuilder.serverId(1111);
-        configBuilder.name("testClient");
-        configBuilder.tables("Cat", "*");
-        configBuilder.target("7-43");
-        configBuilder.timeStamp(1351202896L);
-        configBuilder.transaction(true);
+        configBuilder.transaction(false);
+        configBuilder.host("localhost");
+        configBuilder.port(8080);
+        configBuilder.serverId(11111);
+        configBuilder.name("xxtest");
+        configBuilder.tables("TuanGou2010", "TG_Receipt");
+        configBuilder.target("77_20");
         PumaClient pc = new PumaClient(configBuilder.build());
         pc.register(new EventListener() {
 
@@ -51,9 +50,7 @@ public class TestApi {
 
             @Override
             public void onEvent(ChangedEvent event) throws Exception {
-                if (time == -1L || time != event.getExecuteTime()) {
-                    time = event.getExecuteTime();
-                }
+
                 System.out.println("********************Received " + event);
 
             }

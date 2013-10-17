@@ -29,12 +29,13 @@ public final class PacketUtils {
 	private PacketUtils() {
 
 	}
-	
-	public static byte[] readBit(ByteBuffer buf, int length, boolean isBigEndian) throws IOException {
-		final byte[] value = readBytes(buf, (int)((length + 7) >> 3));
+
+    public static byte[] readBit(ByteBuffer buf, int length, boolean isBigEndian) throws IOException {
+		final byte[] value = readBytes(buf, CodecUtils.BitNumToByteNum(length));
 		return isBigEndian ? value : CodecUtils.toBigEndian(value);
 	}
 
+    //后面的字节是大数位，两个<<写得真妙
 	public static int readInt(ByteBuffer buf, int length) {
 		if ((buf.position() + length) <= buf.limit() && length <= 4) {
 			int r = 0;
@@ -77,7 +78,7 @@ public final class PacketUtils {
 		return 0;
 	}
 
-	public static byte[] readBytes(ByteBuffer buf, int length) {
+    public static byte[] readBytes(ByteBuffer buf, int length) {
 		if ((buf.position() + length) <= buf.limit()) {
 			byte[] r = new byte[length];
 			for (int i = 0; i < length; i++) {
@@ -88,6 +89,7 @@ public final class PacketUtils {
 		return null;
 	}
 
+    //NOTE:有疑问的方法
 	public static UnsignedLong readLengthCodedUnsignedLong(ByteBuffer buf) {
 		byte v = buf.get();
 		if (v < 251) {
@@ -114,8 +116,10 @@ public final class PacketUtils {
 		return new String(readBytes(buf, length));
 	}
 
+    //NOTE: 似乎没翻转
 	public static BitSet readBitSet(ByteBuffer buf, int len) {
-		BitSet bs = new BitSet((int) ((len + 7) >>> 3));
+//		BitSet bs = new BitSet((int) ((len + 7) >>> 3));
+        BitSet bs = new BitSet(len);
 		int i;
 		int b = 0;
 		int leftBit = 0x01;
@@ -129,9 +133,10 @@ public final class PacketUtils {
 			}
 			if ((bitMask & b) == bitMask) {
 				bs.set(i);
-			} else {
-				bs.clear(i);
 			}
+//            else {
+//				bs.clear(i);
+//			}
 		}
 		return bs;
 	}

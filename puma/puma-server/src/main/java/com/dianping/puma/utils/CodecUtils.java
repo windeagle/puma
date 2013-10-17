@@ -30,44 +30,61 @@ public final class CodecUtils {
 
 	}
 
+    public static int ByteNumToBitNum(int byteNum)
+    {
+        return byteNum << 3;
+    }
+
+    public static int BitNumToByteNum(int bitNum)
+    {
+        return (bitNum + 7) >> 3;
+    }
+
+    public static int BitIndexToByteIndex(int bitIndex)
+    {
+        return bitIndex >> 3;
+    }
+
+    public static int GetByteIndexByBitIndex_Reverse(int bytesLen, int bitIndex)
+    {
+        int byteIndex = BitIndexToByteIndex(bitIndex);
+        return bytesLen - 1 - byteIndex;
+    }
+
+    /**
+     *
+     * @param bytes  LittleEndian Bytes (高地址存放最高有效字节)
+     * @return BigEndian BitSet (低地址存放最高有效字节)
+     */
 	public static BitSet fromByteArray(byte[] bytes) {
 		BitSet bits = new BitSet();
-		for (int i = 0; i < bytes.length * 8; i++) {
-			if ((bytes[bytes.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
+		for (int i = 0; i < ByteNumToBitNum(bytes.length); i++) {
+            int byteIndex_Reverse = GetByteIndexByBitIndex_Reverse(bytes.length, i);
+			if ((bytes[byteIndex_Reverse] & (1 << (i % 8))) > 0) {
 				bits.set(i);
 			}
 		}
 		return bits;
 	}
 
-	public static byte[] toByteArray(BitSet bits) {
-		byte[] bytes = new byte[bits.length() / 8 + 1];
+    /**
+     *
+     * @param bits  BigEndian BitSet (低地址存放最高有效字节)
+     * @return LittleEndian Bytes (高地址存放最高有效字节)
+     */
+    public static byte[] toByteArray(BitSet bits) {
+		byte[] bytes = new byte[BitNumToByteNum(bits.length())];
 		for (int i = 0; i < bits.length(); i++) {
 			if (bits.get(i)) {
-				bytes[bytes.length - i / 8 - 1] |= 1 << (i % 8);
+                int byteIndex_Reverse = GetByteIndexByBitIndex_Reverse(bytes.length, i);
+				bytes[byteIndex_Reverse] |= 1 << (i % 8);
 			}
 		}
 		return bytes;
 	}
 
-	public static int toBigEndian(final int v) {
-		int r = v;
-		for (int i = 0; i < 4; i++) {
-			r = ((r & 0x000000FF) << 24) | (r >>> 8);
-		}
-		return r;
-	}
-
-	public static long toBigEndian(final long v) {
-		long r = v;
-		for (int i = 0; i < 8; i++) {
-			r = ((r & 0x00000000000000FFL) << 56) | (r >>> 8);
-		}
-		return r;
-	}
-
 	public static byte[] toBigEndian(byte[] value) {
-		for (int i = 0, length = value.length >> 2; i <= length; i++) {
+		for (int i = 0, length = value.length >> 1; i < length; i++) {
 			final int j = value.length - 1 - i;
 			final byte t = value[i];
 			value[i] = value[j];
@@ -92,7 +109,7 @@ public final class CodecUtils {
 	}
 
 	/**
-	 * 
+	 *  BigEndian (低地址存放最高有效字节)
 	 */
 	public static byte[] toByteArray(byte num) {
 		return new byte[] { num };
