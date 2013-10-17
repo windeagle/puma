@@ -27,7 +27,7 @@ public class PositionInfo {
 
 	@Override
 	public String toString() {
-		return "PositionInfor [binlogFileName=" + binlogFileName + ", binlogPosition=" + binlogPosition + "]";
+		return "PositionInfo [binlogFileName=" + binlogFileName + ", binlogPosition=" + binlogPosition + "]";
 	}
 
 }

@@ -142,6 +142,7 @@ public class MMapBasedBinlogPositionHolder implements BinlogPositionHolder {
                     throw new RuntimeException("Create file(" + path + " failed.", e);
                 }
             }
+            //TODO: else 呢？
         }
 
         MappedByteBuffer mbb = mappedByteBufferMapping.get(path);

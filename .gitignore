@@ -59,7 +59,9 @@ Thumbs.db
 ######################
 .project
 .classpath
+.iml
 .settings/
+.idea/
 
 # temp folder #
 ######################

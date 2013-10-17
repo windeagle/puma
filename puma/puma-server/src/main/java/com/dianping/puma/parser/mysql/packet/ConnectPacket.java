@@ -32,41 +32,64 @@ public class ConnectPacket extends AbstractResponsePacket {
 	protected void doReadPacket(ByteBuffer buf, PumaContext context) {
 		context.setProtocolVersion(buf.get());
 		context.setServerVersion(PacketUtils.readNullTerminatedString(buf));
-		parseVersion(context);
+        context.setThreadId(PacketUtils.readLong(buf, 4));
+        context.setSeed(PacketUtils.readNullTerminatedString(buf));
+
+        //以上为HandshakeV10和HandshakeV9公用部分
+        //以下为optional内容
+
+        context.setServerCapabilities(PacketUtils.readInt(buf, 2));
+        context.setServerCharsetIndex(PacketUtils.readInt(buf, 1));
+        context.setServerStatus(PacketUtils.readInt(buf, 2));
+
+        parseVersion(context);
+
+        if(MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
+                context.getServerSubMinorVersion(), 5, 5, 7))
+        {
+            int serverCapabilitiesPart2 = PacketUtils.readInt(buf, 2);
+            // TODO: context 的 ServerCapabilities 属性需要修改为 long 类型
+            // context.setServerCapabilities(context.getServerCapabilities() +
+            // 65536 * serverCapabilitiesPart2);
+        }
+        else
+        {
+            PacketUtils.readInt(buf, 2);
+        }
+
+//        if((context.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_PLUGIN_AUTH) != 0)
+//        {
+//            int scramble_len = PacketUtils.readInt(buf, 1);
+//        }
+//        else
+//        {
+            PacketUtils.readInt(buf, 1);
+//        }
+
+        if (buf.position() + 10 <= buf.limit()) {
+            buf.position(buf.position() + 10);
+        }
+
+//        if((context.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_SECURE_CONNECTION) != 0)
+//        {
+            String seedPart2 = PacketUtils.readNullTerminatedString(buf);
+            StringBuilder newSeed = new StringBuilder(seedPart2.length() + 8);
+            newSeed.append(context.getSeed());
+            newSeed.append(seedPart2);
+            context.setSeed(newSeed.toString());
+
+            //5.5.7及以后版本后面还可能有“auth-plugin name”
+//            if((context.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_PLUGIN_AUTH) != 0)
+//            {
+//                String auth_plugin_name = PacketUtils.readNullTerminatedString(buf);
+//            }
+//        }
 
 		if (MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
 				context.getServerSubMinorVersion(), 4, 0, 8)) {
 			context.setMaxThreeBytes((256 * 256 * 256) - 1);
 		} else {
 			context.setMaxThreeBytes(255 * 255 * 255);
-		}
-
-		context.setThreadId(PacketUtils.readLong(buf, 4));
-		context.setSeed(PacketUtils.readNullTerminatedString(buf));
-
-		context.setServerCapabilities(0);
-
-		if (buf.position() < buf.limit()) {
-			context.setServerCapabilities(PacketUtils.readInt(buf, 2));
-		}
-
-		if ((MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
-				context.getServerSubMinorVersion(), 4, 1, 1) || ((context.getProtocolVersion() > 9) && (context
-				.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_PROTOCOL_41) != 0))) {
-
-			/* New protocol with 16 bytes to describe server characteristics */
-			context.setServerCharsetIndex(buf.get() & 0xff);
-			context.setServerStatus(PacketUtils.readInt(buf, 2));
-
-			// context.setServerCapabilities(context.getServerCapabilities() +
-			// 65536 * PacketUtil.readInt(buf, 2));
-
-			buf.position(buf.position() + 13);
-			String seedPart2 = PacketUtils.readNullTerminatedString(buf);
-			StringBuilder newSeed = new StringBuilder(20);
-			newSeed.append(context.getSeed());
-			newSeed.append(seedPart2);
-			context.setSeed(newSeed.toString());
 		}
 
 		if (context.getProtocolVersion() > 9) {
