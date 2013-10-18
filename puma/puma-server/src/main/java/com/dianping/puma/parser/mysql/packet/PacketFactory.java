@@ -52,6 +52,7 @@ public final class PacketFactory {
 			case AUTHENTICATE_PACKET:
 				AuthenticatePacket authenticatePacket = new AuthenticatePacket();
 				authenticatePacket.setSeed(context.getSeed());
+                //TODO：seq怎么是从1开始？
 				authenticatePacket.setSeq(1);
 				return authenticatePacket;
 			case COM_BINLOG_DUMP_PACKET:

@@ -101,7 +101,7 @@ public final class PacketUtils {
 		} else if (v == 253) {
 			return UnsignedLong.asUnsigned(readInt(buf, 3));
 		} else if (v == 254) {
-			return UnsignedLong.asUnsigned(readInt(buf, 8));
+			return UnsignedLong.asUnsigned(readLong(buf, 8));
 		} else {
 			return null;
 		}

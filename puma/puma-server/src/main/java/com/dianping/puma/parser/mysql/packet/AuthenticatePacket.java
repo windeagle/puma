@@ -27,9 +27,6 @@ import com.dianping.puma.utils.PacketUtils;
  * 
  */
 public class AuthenticatePacket extends AbstractCommandPacket {
-	/**
-	 * @param command
-	 */
 	public AuthenticatePacket() {
 		super((byte) 0xff);
 	}
@@ -79,21 +76,19 @@ public class AuthenticatePacket extends AbstractCommandPacket {
 		int userLength = (user != null) ? user.length() : 0;
 		int databaseLength = (database != null) ? database.length() : 0;
 		ByteBuffer bodyBuf = ByteBuffer.allocate(((userLength + databaseLength) * 2) + 52);
-
+         if (((context.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_CONNECT_WITH_DB) != 0)
+                && (database != null) && (database.length() > 0)) {
+            context.setClientParam(context.getClientParam() | MySQLCommunicationConstant.CLIENT_CONNECT_WITH_DB);
+        }
 		if ((context.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_SECURE_CONNECTION) != 0) {
 			context.setClientParam(context.getClientParam() | MySQLCommunicationConstant.CLIENT_SECURE_CONNECTION);
-			if (MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
-					context.getServerSubMinorVersion(), 4, 1, 1)) {
-				secureAuth411(bodyBuf, user, password, database, true, context);
-			} else {
-				secureAuth411(bodyBuf, user, password, database, true, context);
-			}
+			secureAuth411(bodyBuf, user, password, database, true, context);
 		} else {
 
 			if (context.isUse41Extensions()) {
 				PacketUtils.writeInt(bodyBuf, context.getClientParam(), 4);
 				PacketUtils.writeInt(bodyBuf, context.getMaxThreeBytes(), 4);
-
+                //TODO：
 				PacketUtils.writeByte(bodyBuf, (byte) 8);
 
 				PacketUtils.writeBytesNoNull(bodyBuf, new byte[23]);
@@ -112,7 +107,7 @@ public class AuthenticatePacket extends AbstractCommandPacket {
 				PacketUtils.writeNullTerminatedString(bodyBuf, MySQLUtils.oldCrypt(password, context.getSeed()),
 						context.getEncoding());
 			}
-
+            //TODO：
 			if (((context.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_CONNECT_WITH_DB) != 0)
 					&& (database != null) && (database.length() > 0)) {
 				PacketUtils.writeNullTerminatedString(bodyBuf, database, context.getEncoding());
@@ -126,21 +121,16 @@ public class AuthenticatePacket extends AbstractCommandPacket {
 
 		if (writeClientParams) {
 			if (context.isUse41Extensions()) {
+                PacketUtils.writeInt(buf, context.getClientParam(), 4);
+                PacketUtils.writeInt(buf, context.getMaxThreeBytes(), 4);
+                //TODO：
 				if (MySQLUtils.versionMeetsMinimum(context.getServerMajorVersion(), context.getServerMinorVersion(),
 						context.getServerSubMinorVersion(), 4, 1, 1)) {
-					PacketUtils.writeInt(buf, database != null && database.length() != 0 ? context.getClientParam()
-							| MySQLCommunicationConstant.CLIENT_SECURE_CONNECTION
-							| MySQLCommunicationConstant.CLIENT_CONNECT_WITH_DB : context.getClientParam()
-							| MySQLCommunicationConstant.CLIENT_SECURE_CONNECTION, 4);
-					PacketUtils.writeInt(buf, context.getMaxThreeBytes(), 4);
-
 					PacketUtils.writeByte(buf, (byte) UTF8_CHARSET_INDEX);
 					PacketUtils.writeBytesNoNull(buf, new byte[23]);
 
-				} else {
-					PacketUtils.writeInt(buf, context.getClientParam(), 4);
-					PacketUtils.writeInt(buf, context.getMaxThreeBytes(), 4);
 				}
+				//TODO：
 			} else {
 				PacketUtils.writeInt(buf, (int) context.getClientParam(), 2);
 				PacketUtils.writeInt(buf, context.getMaxThreeBytes(), 3);
@@ -158,16 +148,19 @@ public class AuthenticatePacket extends AbstractCommandPacket {
 			} catch (Exception e) {
 				throw new IOException(e.getMessage(), e);
 			}
+			//TODO：
 		} else {
 			/* For empty password */
 			PacketUtils.writeByte(buf, (byte) 0);
 		}
 
-		if (database != null && database.length() > 0) {
+        if (((context.getServerCapabilities() & MySQLCommunicationConstant.CLIENT_CONNECT_WITH_DB) != 0)
+                && (database != null) && (database.length() > 0)) {
 			PacketUtils.writeNullTerminatedString(buf, database, context.getEncoding());
-		} else {
-			/* For empty database */
-			PacketUtils.writeByte(buf, (byte) 0);
+            //TODO：
+//		} else {
+//			/* For empty database */
+//			PacketUtils.writeByte(buf, (byte) 0);
 		}
 
 	}

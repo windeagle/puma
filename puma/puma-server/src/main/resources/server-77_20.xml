@@ -13,10 +13,10 @@
         <property name="port" value="3306" />
         <property name="user" value="binlog" />
         <property name="password" value="binlog" />
-        <property name="defaultBinlogFileName" value="host_77-20.004937" />
-        <property name="defaultBinlogPosition" value="158518772" />
+        <property name="defaultBinlogFileName" value="host_77-20.004965" />
+        <property name="defaultBinlogPosition" value="24577042" />
         <property name="parser" ref="defaultParser-77_20" />
-        <property name="serverId" value="9990" />
+        <property name="serverId" value="9290" />
         <property name="dataHandler" ref="datahandler-77_20" />
         <property name="dispatcher" ref="dispatcher-77_20" />
         <property name="binlogPositionHolder" ref="binlogPositionHolder" />

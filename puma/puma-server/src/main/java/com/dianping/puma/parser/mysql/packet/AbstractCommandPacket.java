@@ -26,7 +26,7 @@ import com.dianping.puma.utils.PacketUtils;
 public abstract class AbstractCommandPacket extends AbstractPacket implements CommandPacket {
 
 	private static final long	serialVersionUID	= -4515154194045893692L;
-	protected byte[]			head;
+	//protected byte[]			head;
 	protected byte[]			body;
 	protected byte				command;
 
@@ -67,25 +67,25 @@ public abstract class AbstractCommandPacket extends AbstractPacket implements Co
 		return bytes;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.server.packet.Packet#length()
-	 */
-	@Override
-	public int length() {
-		return length;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.puma.server.packet.Packet#seq()
-	 */
-	@Override
-	public int seq() {
-		return seq;
-	}
+//	/*
+//	 * (non-Javadoc)
+//	 *
+//	 * @see com.dianping.puma.server.packet.Packet#length()
+//	 */
+//	@Override
+//	public int length() {
+//		return length;
+//	}
+//
+//	/*
+//	 * (non-Javadoc)
+//	 *
+//	 * @see com.dianping.puma.server.packet.Packet#seq()
+//	 */
+//	@Override
+//	public int seq() {
+//		return seq;
+//	}
 
 	public void write(OutputStream os, PumaContext context) throws IOException {
 		if (length > context.getMaxThreeBytes()) {
