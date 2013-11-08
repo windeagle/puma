@@ -109,6 +109,7 @@ public class DefaultDataHandler extends AbstractDataHandler {
                 processTransactionCommitEvent(binlogEvent, result);
                 break;
             default:
+                //UNKNOWN_EVENT, INTVAR_EVENT, RAND_EVENT, USER_VAR_EVENT, INCIDENT_EVENT
                 result.setEmpty(true);
                 result.setFinished(true);
                 break;

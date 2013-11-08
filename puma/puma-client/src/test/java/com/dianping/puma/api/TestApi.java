@@ -28,9 +28,8 @@ public class TestApi {
         configBuilder.transaction(false);
         configBuilder.host("localhost");
         configBuilder.port(8080);
-        configBuilder.serverId(11111);
-        configBuilder.name("xxtest");
         configBuilder.tables("TuanGou2010", "TG_Receipt");
+        configBuilder.name("xxtest");
         configBuilder.target("77_20");
         PumaClient pc = new PumaClient(configBuilder.build());
         pc.register(new EventListener() {

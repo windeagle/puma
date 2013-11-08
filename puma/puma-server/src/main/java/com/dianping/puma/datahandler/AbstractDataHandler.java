@@ -166,6 +166,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
         if (result != null && !result.isEmpty() && result.getData() != null) {
             result.getData().setBinlog(context.getBinlogFileName());
             result.getData().setBinlogPos(context.getBinlogStartPos());
+            //NOTE:这里到底记哪个ServerId
             result.getData().setServerId(binlogEvent.getHeader().getServerId());
             result.getData().setBinlogServerId(context.getDBServerId());
         }
@@ -195,6 +196,7 @@ public abstract class AbstractDataHandler implements DataHandler, Notifiable {
         // BEGIN事件，发送一个begin transaction的事件
         ChangedEvent dataChangedEvent = new RowChangedEvent();
         ((RowChangedEvent) dataChangedEvent).setTransactionBegin(true);
+        //NOTE:这里到底记哪个Timestamp   Header里的还是Event里的
         dataChangedEvent.setExecuteTime(binlogEvent.getHeader().getTimestamp());
         dataChangedEvent.setDatabase(queryEvent.getDatabaseName());
 

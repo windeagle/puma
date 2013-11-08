@@ -9,22 +9,22 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * 
  */
 public enum ComponentContainer {
-	SPRING;
+    SPRING;
 
-	private static final String				SPRING_CONFIG	= "context-bootstrap.xml";
+    private static final String				SPRING_CONFIG	= "context-bootstrap.xml";
 
-	private transient ApplicationContext	ctx;
+    private transient ApplicationContext	ctx;
 
-	private ComponentContainer() {
-		this.ctx = new ClassPathXmlApplicationContext(SPRING_CONFIG);
-	}
+    private ComponentContainer() {
+        this.ctx = new ClassPathXmlApplicationContext(SPRING_CONFIG);
+    }
 
-	@SuppressWarnings("unchecked")
-	public <T> T lookup(String id) {
-		return (T) this.ctx.getBean(id);
-	}
+    @SuppressWarnings("unchecked")
+    public <T> T lookup(String id) {
+        return (T) this.ctx.getBean(id);
+    }
 
-	public <T> T lookup(String id, Class<T> type) {
-		return this.ctx.getBean(id, type);
-	}
+    public <T> T lookup(String id, Class<T> type) {
+        return this.ctx.getBean(id, type);
+    }
 }
